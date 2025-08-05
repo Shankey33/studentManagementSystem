@@ -1,8 +1,49 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+
 public class Main{
     
+    public void exportCsv(){
+        try(PrintWriter writer = new PrintWriter(new File("students.csv"))){
+            writer.println("Roll Number - Name - Class - Marks");
+
+            for(Student s: students){
+                writer.println(s.rollNumber + "," + s.name + "," + s.sklClass + "," + s.marks );
+                System.out.println("Students Data exported Successfully!");
+            } 
+        }
+        catch(Exception e){
+            System.out.println("Error Exporting data to CSV, check error refrence: " + e.getMessage());
+        }
+    }
+
+    private static final String FILE_NAME = "students.dat";
+
+    public void saveData() {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {    
+            out.writeObject(students);
+        } catch (Exception e) {
+            System.out.println("❌ Error saving data: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void loadData() {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            students = (ArrayList<Student>) in.readObject();
+        } catch (Exception e) {
+            students = new ArrayList<>();
+        }
+    }
+
+
 
 
     private ArrayList<Student>students = new ArrayList<>();
@@ -48,6 +89,7 @@ public class Main{
             Student s1 = new Student(roll, marks, sklClass, name);
 
             students.add(s1);
+            saveData();
 
             System.out.println("Student Added successfully\n\n");
 
@@ -162,6 +204,7 @@ public class Main{
             
                 case 5: {
                     students.remove(s1);
+                    saveData();
                     System.out.println("\nStudent Deleted Successfully\n");
                     return;
                 }
@@ -170,8 +213,9 @@ public class Main{
                 case 6: {
                     return;
                 }
-            
             }
+
+
         }
 
 
@@ -184,6 +228,7 @@ public class Main{
     public static void main(String[] args) {
         
         Main app = new Main();
+        app.loadData();
 
         Scanner input = new Scanner(System.in);
 
@@ -193,7 +238,7 @@ public class Main{
 
         while(true){
 
-            System.out.println("[1] View All Students\n[2] Add a new student\n[3] View a student by roll number\n[4] Exit\n\n");
+            System.out.println("[1] View All Students\n[2] Add a new student\n[3] View a student by roll number\n[4] Export to CSV\n[5] Exit\n\n");
 
             System.out.print("Enter Selection: ");
 
@@ -208,7 +253,7 @@ public class Main{
            }
 
 
-            if(selection < 1 || selection > 4 ){
+            if(selection < 1 || selection > 5 ){
                 System.out.println("Invalid Selection!\n");
                 continue;
             }
@@ -230,8 +275,14 @@ public class Main{
                     continue;
                 }
 
-                case 4: {
+                case 4:{
+                    app.exportCsv();
+                    continue;
+                }
+
+                case 5: {
                     System.out.println("Exiting the app...");
+                    app.saveData();
                     return;
                 }
 
@@ -239,7 +290,6 @@ public class Main{
                     System.out.println("Invalid Selection!\n");
                 }
 
-                System.out.println("\n\n\n");
             }
         }
 
